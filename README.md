@@ -157,11 +157,3 @@ ln -sfn "/path/to/study/derivatives/freesurfer-7.4.1"        "$NIPROOT/derivativ
 ```
 
 ---
-
-## Next steps (coming next)
-
-- Decide the I/O contract for the custom pipeline (inputs from BIDS, outputs to derivatives)
-- Containerize the pipeline (Apptainer/Singularity on Narval)
-- Add a Boutiques descriptor + invocation template
-- Register the pipeline in `global_config.json` under `PROC_PIPELINES`
-- Run the pipeline via Nipoppy and validate outputs
