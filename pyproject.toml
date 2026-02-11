@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nipoppy-custom-pipeline"
+version = "0.1.0"
+description = "Example custom pipeline repo to integrate into Nipoppy (neuroimaging)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "nipoppy"
+]
+
+[project.scripts]
+ncp = "nipoppy_custom_pipeline.cli.main:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
