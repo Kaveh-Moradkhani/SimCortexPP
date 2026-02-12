@@ -157,3 +157,75 @@ ln -sfn "/path/to/study/derivatives/freesurfer-7.4.1"        "$NIPROOT/derivativ
 ```
 
 ---
+
+# Preprocessing: FreeSurfer → MNI (BIDS-derivatives-style)
+
+This stage is part of the **SimCortexPP** pipeline. It handles the extraction of FreeSurfer volumes and surfaces, registers them to a standard template (MNI152), and organizes the output into a BIDS-compliant derivatives structure.
+
+## Overview
+The script automates the following tasks:
+- **Volume Export:** Converts FreeSurfer `.mgz` files to NIfTI `.nii.gz`.
+- **Affine Registration:** Aligns native T1w images to the MNI152 template using `reg_aladin`.
+- **Label Resampling:** Transforms segmentations (`aseg`, `aparc`) to MNI space using nearest-neighbor interpolation.
+- **Surface Processing:** Exports cortical meshes to PLY format, applies MNI transformation, and optionally generates decimated (simplified) meshes.
+
+---
+
+## Inputs
+1. **FreeSurfer Derivatives:** A directory containing processed subjects (e.g., `.../derivatives/freesurfer-7.4.1/`).
+2. **MNI Template:** An MNI152 T1 reference image (e.g., `MNI152_T1_1mm.nii.gz`).
+
+## Dependencies
+### Software
+- **NiftyReg:** `reg_aladin`, `reg_resample` (Must be in PATH).
+- **FreeSurfer:** Required for internal coordinate handling and fallback conversion.
+
+### Python Environment
+- `numpy`, `nibabel`, `trimesh`, `typer`
+
+---
+
+## Usage
+
+### Run: Automatic Subject Discovery
+Processes all valid subjects found under the FreeSurfer root directory.
+```bash
+python scripts/preprocess_fs_to_mni_bidsderiv.py \
+  --freesurfer-root /path/to/derivatives/freesurfer-7.4.1 \
+  --out-deriv-root  /path/to/derivatives/scpp-preproc-0.1 \
+  --mni-template    src/MNI152_T1_1mm.nii.gz \
+  --decimate 0.3 \
+  -v
+```
+## Run: Selected Subjects
+Processes only the specified subject IDs.
+```bash
+python scripts/preprocess_fs_to_mni_bidsderiv.py \
+  --freesurfer-root /path/to/derivatives/freesurfer-7.4.1 \
+  --out-deriv-root  /path/to/derivatives/scpp-preproc-0.1 \
+  --mni-template    src/MNI152_T1_1mm.nii.gz \
+  -p sub-100307 -p sub-101107 \
+  -v
+```
+
+## Outputs
+The script creates a structured directory inspired by BIDS Derivatives:
+
+```text
+<out-deriv-root>/
+  dataset_description.json
+  sub-XXXX/
+    ses-01/
+      anat/
+        sub-XXXX_ses-01_desc-preproc_T1w.nii.gz                   # Native T1
+        sub-XXXX_ses-01_space-MNI152_desc-preproc_T1w.nii.gz     # MNI T1
+        sub-XXXX_ses-01_desc-aseg_dseg.nii.gz                    # Native Seg
+        sub-XXXX_ses-01_space-MNI152_desc-aseg_dseg.nii.gz       # MNI Seg
+        sub-XXXX_ses-01_from-T1w_to-MNI152_mode-image_xfm.txt    # Affine Matrix
+      surfaces/
+        sub-XXXX_ses-01_hemi-L_white.surf.ply                    # Native Mesh
+        sub-XXXX_ses-01_space-MNI152_hemi-L_white.surf.ply       # MNI Mesh
+        sub-XXXX_ses-01_desc-decim0p3_hemi-L_white.surf.ply      # Simplified Mesh
+        ...
+```
+
