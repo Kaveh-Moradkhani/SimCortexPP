@@ -20,3 +20,14 @@ dist/
 
 # Logs
 *.log
+
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.pipeline.log
+pipeline.log

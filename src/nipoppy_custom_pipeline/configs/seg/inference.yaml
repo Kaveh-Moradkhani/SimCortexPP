@@ -1,0 +1,28 @@
+dataset:
+  path: /PATH/TO/<out-deriv-root>
+  split_file: /PATH/TO/dataset_split.csv
+  split_name: test
+  session_label: "01"
+  space: MNI152
+  pad_mult: 16
+
+trainer:
+  device: cuda:0
+  batch_size: 2
+  num_workers: 4
+
+model:
+  in_channels: 1
+  out_channels: 9
+  ckpt_path: /PATH/TO/seg_best_dice.pt
+
+outputs:
+  pred_root: /PATH/TO/predictions_seg9     # IMPORTANT: root dir (it will create sub/ses/anat)
+  log_dir:  /PATH/TO/logs_infer
+
+hydra:
+  run:
+    dir: ${outputs.log_dir}
+  output_subdir: null
+  job:
+    chdir: false

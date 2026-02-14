@@ -1,0 +1,36 @@
+dataset:
+  path: /PATH/TO/<out-deriv-root>          # fs-to-mni output derivative root
+  split_file: /PATH/TO/dataset_split.csv
+  session_label: "01"
+  space: MNI152
+  pad_mult: 16
+  train_split: train
+  val_split: val
+  augment: true
+
+trainer:
+  device: cuda:0
+  num_epochs: 500
+  learning_rate: 1e-4
+  batch_size: 6
+  num_workers: 4
+  validation_interval: 15
+  dice_weight: 1.0
+  use_ddp: true
+  data_parallel: false
+
+model:
+  in_channels: 1
+  out_channels: 9
+
+outputs:
+  root: /PATH/TO/ckpts/segmentation
+  log_dir:  ${outputs.root}/logs_train
+  ckpt_dir: ${outputs.root}/checkpoints
+
+hydra:
+  run:
+    dir: ${outputs.log_dir}
+  output_subdir: null
+  job:
+    chdir: false

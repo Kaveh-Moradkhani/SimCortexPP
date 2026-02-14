@@ -1,0 +1,23 @@
+dataset:
+  path: /PATH/TO/<out-deriv-root>
+  split_file: /PATH/TO/dataset_split.csv
+  split_name: test
+  session_label: "01"
+  space: MNI152
+
+evaluation:
+  num_classes: 9
+  exclude_background: true
+  nsd_tolerance_vox: 1.0
+
+outputs:
+  pred_root: /PATH/TO/predictions_seg9
+  log_dir:  /PATH/TO/logs_eval
+  eval_csv: /PATH/TO/evaluations/seg_eval_test.csv
+
+hydra:
+  run:
+    dir: ${outputs.log_dir}
+  output_subdir: null
+  job:
+    chdir: false
