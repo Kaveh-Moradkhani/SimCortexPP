@@ -291,46 +291,7 @@ scpp seg eval \
 
 ---
 
-## Outputs Summary
 
-### Preprocessing output (`scpp-preproc-0.1`)
-- MNI T1, MNI aparc+aseg, MNI filled
-- transforms (`*_xfm.txt`)
-- MNI-space surfaces (PLY)
-
-### Segmentation output (`scpp-seg-0.1`)
-- predictions per subject:
-  - `sub-XXXX_ses-01_space-MNI152_desc-seg9_pred.nii.gz`
-- evaluation reports:
-  - `seg_eval_test.csv`
-  - `seg_eval_test.xlsx` (optional)
-
----
-
-## Troubleshooting
-
-### 1) `FileNotFoundError` for split CSV
-Ensure you passed the correct absolute path:
-```bash
-scpp seg infer dataset.split_file=/absolute/path/to/dataset_split.csv
-```
-
-### 2) Multi-dataset keys mismatch
-If your split file has `dataset=HCP_YA`, your config/overrides must use the same key:
-- `dataset.roots.HCP_YA=...`
-- `outputs.pred_roots.HCP_YA=...`
-
-### 3) Session label mismatch
-If your data is under `ses-01`, your config should use:
-- `dataset.session_label="01"` (or `"ses-01"` depending on implementation)
-
-### 4) Missing expected preproc files
-Verify the preprocessing outputs exist for a subject:
-- `*_desc-preproc_T1w.nii.gz`
-- `*_desc-aparc+aseg_dseg.nii.gz`
-- `*_desc-filled_T1w.nii.gz`
-
----
 
 ## License
 Add your license and citation details here if needed.
