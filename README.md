@@ -8,6 +8,8 @@ SimCortexPP (SCPP) is a **CLI-first** Python package that provides two practical
 2. **Segmentation (3D U-Net in MNI space)**  
    Train and apply a 3D U-Net to predict a **9-class** segmentation in **MNI152 space**, with inference and evaluation utilities.
 
+3. **Initial Surfaces (InitSurf)** Generate robust, collision-free initial White Matter and Pial cortical surfaces from the segmentation predictions.
+
 This README focuses on **how to run the pipeline correctly** (inputs, outputs, expected folder/file naming, and commands).
 
 ---
@@ -24,6 +26,7 @@ This README focuses on **how to run the pipeline correctly** (inputs, outputs, e
   - [Train](#train)
   - [Inference](#inference)
   - [Evaluation](#evaluation)
+- [Stage 3 — Initial Surfaces (InitSurf)](#stage-3--initial-surfaces-initsurf)
 - [Outputs Summary](#outputs-summary)
 - [Troubleshooting](#troubleshooting)
 
@@ -37,13 +40,14 @@ From the repository root:
 pip install -e .
 scpp --help
 scpp seg --help
+scpp initsurf --help
 ```
 
 ### Recommended environment
 - Python 3.10+
 - PyTorch + MONAI
 - `nibabel`, `numpy`, `pandas`, `openpyxl` (for Excel report)
-
+- `trimesh`, `scipy (for surface generation)
 ---
 
 ## Data and Folder Conventions
