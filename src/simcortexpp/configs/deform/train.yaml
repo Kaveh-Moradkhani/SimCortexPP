@@ -1,0 +1,98 @@
+user_config: null
+
+dataset:
+  split_file: /project/hippocampus/common/kaveh/workspace/datasets/splits/dataset_split.csv
+  train_split_name: train
+  val_split_name: val
+
+  session_label: "01"
+  space: "MNI152"
+
+  roots:
+    HCP_YA:  /project/hippocampus/common/kaveh/workspace/datasets/hcpya-u100/derivatives/scpp-preproc-0.1
+    OASIS1:  /project/hippocampus/common/kaveh/workspace/datasets/oasis-1/derivatives/scpp-preproc-0.1
+
+  initsurf_roots:
+    HCP_YA:  /project/hippocampus/common/kaveh/workspace/datasets/hcpya-u100/derivatives/scpp-initsurf-0.1
+    OASIS1:  /project/hippocampus/common/kaveh/workspace/datasets/oasis-1/derivatives/scpp-initsurf-0.1
+
+  surface_name: ["lh_pial", "lh_white", "rh_pial", "rh_white"]
+
+  prob_clip_min: 0.0
+  prob_clip_max: 1.0
+  prob_gamma: 1.0
+  add_prob_grad: false
+
+  aug_prob: 0.30
+  aug_rot_range_deg: 5.0
+  aug_scale_range: 0.03
+  aug_trans_range_mm: 2.0
+
+trainer:
+  seed: 2025
+  img_batch_size: 1
+  grad_accum_steps: 4
+  num_epochs: 500
+  validation_interval: 5
+  collision_interval: 50
+
+  learning_rate: 1.0e-4
+  weight_decay: 5.0e-5
+
+  points_per_image: 150000
+  val_points_per_image: 100000
+  num_workers: 4
+  log_level: INFO
+  mesh_chunk: 4
+  grad_clip_norm: 1.0
+
+  scheduler_patience: 2
+  scheduler_factor: 0.5
+  scheduler_min_lr: 1.0e-6
+  scheduler_threshold_mm: 0.0
+  scheduler_threshold_mode: rel
+  scheduler_cooldown: 0
+
+  early_stop_patience: 12
+  early_stop_min_delta_mm: 0.0003
+
+model:
+  sigma: 1
+  n_steps: 8
+  inshape: [184, 224, 184]
+  c_hid: [8, 16, 32, 64, 128, 128]
+  c_in: 2
+
+  geom_ratio: 0.5
+  geom_depth: 6
+  gn_groups: 8
+  gate_init: -3.0
+
+  init_ckpt: ""
+  init_strict: true
+
+objective:
+  chamfer_weight: 1.0
+  edge_loss_weight: 0.3
+  normal_weight: 0.3
+  reg_warmup_epochs: 10
+
+  hd_weight: 5.0
+  hd_p: 0.01
+  hd_lambda_mm: 0.6
+  hd_points: 60000
+
+  pial_lr_hd_weight: 0.5
+  pial_lr_hd_p: 0.001
+  pial_lr_hd_lambda_mm: 0.6
+  pial_lr_hd_points: 25000
+
+outputs:
+  root: /project/hippocampus/common/kaveh/workspace/scpp-runs/deform/exp01_hcpya+oasis1
+
+hydra:
+  run:
+    dir: ${outputs.root}
+  output_subdir: null
+  job:
+    chdir: false

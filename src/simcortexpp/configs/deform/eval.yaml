@@ -1,0 +1,34 @@
+user_config: null
+
+dataset:
+  split_file: /project/hippocampus/common/kaveh/workspace/datasets/splits/dataset_split.csv
+  split_name: test
+  session_label: "01"
+  space: "MNI152"
+
+  # Stage 1 roots (GT surfaces)
+  roots:
+    HCP_YA:  /project/hippocampus/common/kaveh/workspace/datasets/hcpya-u100/derivatives/scpp-preproc-0.1
+    OASIS1:  /project/hippocampus/common/kaveh/workspace/datasets/oasis-1/derivatives/scpp-preproc-0.1
+
+outputs:
+  # Stage 4 prediction roots (deformed surfaces)
+  pred_roots:
+    HCP_YA:  /project/hippocampus/common/kaveh/workspace/datasets/hcpya-u100/derivatives/scpp-deform-0.1
+    OASIS1:  /project/hippocampus/common/kaveh/workspace/datasets/oasis-1/derivatives/scpp-deform-0.1
+
+  out_dir: /project/hippocampus/common/kaveh/workspace/scpp-runs/deform/exp01_hcpya+oasis1/eval_test
+
+eval:
+  pred_desc: "deform"     # matches inference naming: desc-deform
+  device: "cuda:0"
+  n_chamfer: 150000
+  n_assd_hd: 150000
+  log_level: "INFO"
+
+hydra:
+  run:
+    dir: ${outputs.out_dir}
+  output_subdir: null
+  job:
+    chdir: false
