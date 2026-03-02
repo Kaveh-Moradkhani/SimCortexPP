@@ -31,8 +31,6 @@ This README focuses on **how to run the pipeline correctly** (inputs, outputs, f
   - [Evaluation](#evaluation)
 - [Stage 3 — Initial Surfaces (InitSurf)](#stage-3--initial-surfaces-initsurf)
 - [Stage 4 — Deformation (Deform)](#stage-4--deformation-deform)
-- [Outputs Summary](#outputs-summary)
-- [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 ---
