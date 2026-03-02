@@ -327,9 +327,9 @@ scpp initsurf generate \
   outputs.out_roots.OASIS1=/path/to/Datasets/oasis-1/derivatives/scpp-initsurf-0.1 \
   outputs.log_dir=/path/to/scpp-runs/initsurf/exp01/logs_generate
 ```
-```
-Typical runtime: ~31 s/subject (based on a 515-subject run; hardware-dependent).
-```
+
+⏱️ Typical runtime: ~31 s/subject (based on a 515-subject run; hardware-dependent).
+
 ---
 
 ## Recommended workflow order
