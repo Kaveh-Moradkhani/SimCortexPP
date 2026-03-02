@@ -353,16 +353,6 @@ For each dataset root:
 
 ---
 
-## Troubleshooting
-
-- **Subjects are dropped in Deform train/infer**: verify all required files exist (T1, ribbon_prob, init surfaces, GT surfaces).  
-  Also ensure you consistently use the same dataset root path (e.g., `datasets/` vs `Datasets/`).
-
-- **Collision metrics are missing**: install `python-fcl`. If not installed, collision outputs are skipped (NaN).
-
-- **SIF is NaN**: install `pymeshlab`.
-
----
 
 ## License
 
