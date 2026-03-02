@@ -290,7 +290,7 @@ scpp-initsurf-0.1/
 scpp initsurf generate   dataset.split_file=/path/to/datasets/splits/dataset_split.csv   dataset.split_name=all   dataset.roots.HCP_YA=/path/to/datasets/hcpya-u100/derivatives/scpp-preproc-0.1   dataset.roots.OASIS1=/path/to/datasets/oasis-1/derivatives/scpp-preproc-0.1   dataset.seg_roots.HCP_YA=/path/to/datasets/hcpya-u100/derivatives/scpp-seg-0.1   dataset.seg_roots.OASIS1=/path/to/datasets/oasis-1/derivatives/scpp-seg-0.1   outputs.out_roots.HCP_YA=/path/to/datasets/hcpya-u100/derivatives/scpp-initsurf-0.1   outputs.out_roots.OASIS1=/path/to/datasets/oasis-1/derivatives/scpp-initsurf-0.1   outputs.log_dir=/path/to/scpp-runs/initsurf/exp01/logs_generate
 ```
 
-Typical runtime: ~20 s/subject (hardware-dependent).
+Typical runtime: ~31 s/subject (hardware-dependent).
 
 ---
 
