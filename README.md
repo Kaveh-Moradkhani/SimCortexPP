@@ -1,6 +1,6 @@
 # SimCortexPP (SCPP)
 
-SimCortexPP (SCPP) is a **CLI-first** Python package that provides four stages commonly used in cortical surface reconstruction workflows:
+SimCortexPP (SCPP) is a **CLI-first** Python package for cortical surface reconstruction in MNI space. It provides four stages:
 
 1. **Preprocessing (FreeSurfer → MNI152)**  
    Export key FreeSurfer volumes/surfaces, register them to MNI152, and write outputs in a **BIDS-derivatives-style** layout.
@@ -12,7 +12,7 @@ SimCortexPP (SCPP) is a **CLI-first** Python package that provides four stages c
    Generate initial White Matter and Pial surfaces from segmentation predictions (plus ribbon SDF/probability outputs).
 
 4. **Deformation (Deform)**  
-   Deform the initial surfaces toward FreeSurfer MNI-aligned surfaces using geometric losses and optional collision metrics, and write **deformed surfaces** as BIDS-derivatives.
+   Deform the initial surfaces toward MNI-aligned FreeSurfer surfaces using geometric losses and optional collision metrics, and write **deformed surfaces** as BIDS-derivatives.
 
 This README focuses on **how to run the pipeline correctly** (inputs, outputs, folder/file naming, and commands).
 
@@ -21,14 +21,11 @@ This README focuses on **how to run the pipeline correctly** (inputs, outputs, f
 ## Table of Contents
 
 - [Installation](#installation)
+- [Configuration](#configuration)
 - [Data and Folder Conventions](#data-and-folder-conventions)
-- [Session-less BIDS Datasets (Optional)](#session-less-bids-datasets-optional)
+- [Split File Format](#split-file-format)
 - [Stage 1 — Preprocessing: FreeSurfer → MNI152](#stage-1--preprocessing-freesurfer--mni152)
 - [Stage 2 — Segmentation: 3D U-Net (MNI space)](#stage-2--segmentation-3d-u-net-mni-space)
-  - [Split File Format](#split-file-format)
-  - [Train](#train)
-  - [Inference](#inference)
-  - [Evaluation](#evaluation)
 - [Stage 3 — Initial Surfaces (InitSurf)](#stage-3--initial-surfaces-initsurf)
 - [Stage 4 — Deformation (Deform)](#stage-4--deformation-deform)
 - [License](#license)
@@ -51,11 +48,25 @@ scpp deform --help
 - Python 3.10+
 - PyTorch + MONAI
 - `nibabel`, `numpy`, `pandas`, `openpyxl`
-- `trimesh`, `scipy`
+- `trimesh`, `scipy`, `tqdm`
 - External tools for Stage 1: **NiftyReg** (`reg_aladin`, `reg_resample`)
-- Optional:
-  - `python-fcl` for collision metrics (Deform)
-  - `pymeshlab` for SIF (self-intersection fraction) in Deform eval
+- Optional (Deform metrics):
+  - `python-fcl` for collision metrics
+  - `pymeshlab` for SIF (self-intersection fraction) in Deform evaluation
+
+---
+
+## Configuration
+
+All stages use Hydra YAML configs shipped with the package (see `src/simcortexpp/configs/<stage>/*.yaml`).
+
+You have **two** ways to configure a run:
+
+1) **Edit the stage YAML** (recommended for longer runs / stable experiments), then run commands with no extra arguments, e.g.:
+   - `scpp deform eval`
+
+2) **Use Hydra overrides on the CLI** (recommended for quick tests), e.g.:
+   - `scpp deform eval dataset.split_name=test outputs.out_dir=/tmp/deform_eval`
 
 ---
 
@@ -84,37 +95,29 @@ datasets/<dataset-name>/
 
 SCPP reads inputs from `derivatives/` and writes outputs back to `derivatives/` using BIDS-derivatives-style naming.
 
+> Important: keep the dataset root naming consistent (e.g., use `datasets/...` everywhere).
+
 ---
 
-## Session-less BIDS Datasets (Optional)
+## Split File Format
 
-Some datasets are **session-less** (no `ses-*` folder). If you want a consistent `ses-01` layout, you can create a **non-destructive sessioned view** using symlinks.
+A split CSV is required for Segmentation, InitSurf, and Deform.
 
-Script:
-```bash
-scripts/create_ses_view.sh
-```
+### Single-dataset split
+Minimal columns:
+- `subject` (e.g., `sub-0001`)
+- `split` in `{train, val, test}`
 
-Edit variables at the top of the script:
-```bash
-SRC="/path/to/bids"
-DST="/path/to/bids_ses"
-SES="01"
-```
+### Multi-dataset split
+Include an additional column:
+- `dataset` (string key that matches config keys, e.g., `HCP_YA`, `OASIS1`)
 
-Run:
-```bash
-bash scripts/create_ses_view.sh
-```
-
-This creates a sessioned view:
-- `sub-XXXX/ses-01/anat/`
-- symlinked files (no data is copied)
-- filenames updated to include `_ses-01_` where needed
-
-To remove the sessioned view:
-```bash
-rm -rf /path/to/bids_ses
+Example:
+```csv
+subject,split,dataset
+sub-100307,test,HCP_YA
+sub-101915,test,HCP_YA
+sub-0001,test,OASIS1
 ```
 
 ---
@@ -124,7 +127,7 @@ rm -rf /path/to/bids_ses
 This stage exports key FreeSurfer outputs (volumes + surfaces), registers them to **MNI152**, and writes results to a **BIDS-derivatives-style** folder.
 
 ### Inputs
-- FreeSurfer derivatives root (contains subject folders, e.g., `sub-0001/`, `sub-0019/`, ...)
+- FreeSurfer derivatives root (contains `sub-*` folders)
 - MNI template (e.g., `src/MNI152_T1_1mm.nii.gz`)
 
 ### Dependencies (system tools)
@@ -132,19 +135,16 @@ This stage exports key FreeSurfer outputs (volumes + surfaces), registers them t
 - **FreeSurfer** tools are recommended (e.g., `mri_convert`, `mris_convert`) for consistent conversions
 
 ### Run (all subjects discovered automatically)
-
 ```bash
 scpp fs-to-mni   --freesurfer-root /path/to/datasets/<dataset>/derivatives/freesurfer-7.4.1   --out-deriv-root  /path/to/datasets/<dataset>/derivatives/scpp-preproc-0.1   --mni-template    /path/to/SimCortexPP/src/MNI152_T1_1mm.nii.gz   --decimate 0.3   -v
 ```
 
 ### Run (selected subjects)
-
 ```bash
 scpp fs-to-mni   --freesurfer-root /path/to/datasets/<dataset>/derivatives/freesurfer-7.4.1   --out-deriv-root  /path/to/datasets/<dataset>/derivatives/scpp-preproc-0.1   --mni-template    /path/to/SimCortexPP/src/MNI152_T1_1mm.nii.gz   -p sub-0001 -p sub-0019   -v
 ```
 
 ### Output layout (example)
-
 ```text
 scpp-preproc-0.1/
   dataset_description.json
@@ -166,86 +166,34 @@ scpp-preproc-0.1/
 
 ## Stage 2 — Segmentation: 3D U-Net (MNI space)
 
-This stage trains and applies a 3D U-Net to predict a **9-class segmentation** in **MNI152 space** using the preprocessed outputs.
+This stage trains and applies a 3D U-Net to predict a **9-class segmentation** in **MNI152 space** using Stage 1 outputs.
 
 ### Expected inputs (from Stage 1)
-Under `dataset.path` (single dataset) or per-dataset `dataset.roots` (multi-dataset), for each subject:
-
-- MNI T1  
-  `sub-XXXX/ses-01/anat/sub-XXXX_ses-01_space-MNI152_desc-preproc_T1w.nii.gz`
-
-- MNI aparc+aseg (used to create the 9-class ground truth)  
-  `sub-XXXX/ses-01/anat/sub-XXXX_ses-01_space-MNI152_desc-aparc+aseg_dseg.nii.gz`
-
-- MNI filled (used for ambiguity fix in label mapping)  
-  `sub-XXXX/ses-01/anat/sub-XXXX_ses-01_space-MNI152_desc-filled_T1w.nii.gz`
+Under `scpp-preproc-*`, for each subject:
+- `..._desc-preproc_T1w.nii.gz`
+- `..._desc-aparc+aseg_dseg.nii.gz`
+- `..._desc-filled_T1w.nii.gz`
 
 ### Output naming (predictions)
-Predictions are written in BIDS-derivatives style under the configured output root:
-
+Predictions are written under `scpp-seg-*`:
 - `sub-XXXX/ses-01/anat/sub-XXXX_ses-01_space-MNI152_desc-seg9_dseg.nii.gz`
 
----
-
-## Split File Format
-
-A split CSV is required.
-
-### Single-dataset
-Minimal columns:
-- `subject` (e.g., `sub-100307`)
-- `split` in `{train, val, test}`
-
-### Multi-dataset
-Include an additional column:
-- `dataset` (string key that matches config keys, e.g., `HCP_YA`, `OASIS1`)
-
-Example:
-```csv
-subject,split,dataset
-sub-100307,test,HCP_YA
-sub-101915,test,HCP_YA
-sub-0001,test,OASIS1
-```
-
----
-
-## Train
-
-### Single-GPU
+### Train (single GPU)
 ```bash
 scpp seg train   dataset.path=/path/to/datasets/<dataset>/derivatives/scpp-preproc-0.1   dataset.split_file=/path/to/datasets/<dataset>/splits/<dataset>_split.csv   outputs.root=/path/to/scpp-runs/seg/exp01   trainer.use_ddp=false
 ```
 
-### Multi-GPU DDP (torchrun)
+### Train (multi-GPU, torchrun)
 ```bash
 scpp seg train --torchrun --nproc-per-node 2   dataset.path=/path/to/datasets/<dataset>/derivatives/scpp-preproc-0.1   dataset.split_file=/path/to/datasets/<dataset>/splits/<dataset>_split.csv   outputs.root=/path/to/scpp-runs/seg/exp01   trainer.use_ddp=true
 ```
 
----
-
-## Inference
-
-### Single dataset
+### Inference
 ```bash
 scpp seg infer   dataset.path=/path/to/datasets/<dataset>/derivatives/scpp-preproc-0.1   dataset.split_file=/path/to/datasets/<dataset>/splits/<dataset>_split.csv   dataset.split_name=test   model.ckpt_path=/path/to/seg_best_dice.pt   outputs.out_root=/path/to/datasets/<dataset>/derivatives/scpp-seg-0.1
 ```
 
-### Multi-dataset inference (two datasets example)
-```bash
-scpp seg infer   dataset.split_file=/path/to/datasets/splits/dataset_split.csv   dataset.split_name=test   dataset.roots.HCP_YA=/path/to/datasets/hcpya-u100/derivatives/scpp-preproc-0.1   dataset.roots.OASIS1=/path/to/datasets/oasis-1/derivatives/scpp-preproc-0.1   model.ckpt_path=/path/to/seg_best_dice.pt   outputs.out_roots.HCP_YA=/path/to/datasets/hcpya-u100/derivatives/scpp-seg-0.1   outputs.out_roots.OASIS1=/path/to/datasets/oasis-1/derivatives/scpp-seg-0.1
-```
-
----
-
-## Evaluation
-
-Evaluation computes (per subject):
-- **Dice**
-- **Accuracy**
-- **NSD / Surface Dice** (MONAI `compute_surface_dice`)
-
-### Multi-dataset evaluation
+### Evaluation (multi-dataset example)
 ```bash
 scpp seg eval   dataset.split_file=/path/to/datasets/splits/dataset_split.csv   dataset.split_name=test   dataset.roots.HCP_YA=/path/to/datasets/hcpya-u100/derivatives/scpp-preproc-0.1   dataset.roots.OASIS1=/path/to/datasets/oasis-1/derivatives/scpp-preproc-0.1   outputs.pred_roots.HCP_YA=/path/to/datasets/hcpya-u100/derivatives/scpp-seg-0.1   outputs.pred_roots.OASIS1=/path/to/datasets/oasis-1/derivatives/scpp-seg-0.1   outputs.eval_csv=/path/to/scpp-runs/seg/exp01/evals/seg_eval_test.csv   outputs.eval_xlsx=/path/to/scpp-runs/seg/exp01/evals/seg_eval_test.xlsx
 ```
@@ -262,8 +210,7 @@ This stage generates initial cortical surfaces from saved segmentation predictio
 - Split CSV (same format as Stage 2)
 
 ### Outputs
-BIDS-derivatives-style outputs under `scpp-initsurf-*`:
-
+BIDS-derivatives-style outputs under `scpp-initsurf-*` (meshes + SDF volumes + ribbon prob):
 ```text
 scpp-initsurf-0.1/
   dataset_description.json
@@ -294,7 +241,7 @@ Typical runtime: ~31 s/subject (hardware-dependent).
 
 ## Stage 4 — Deformation (Deform)
 
-This stage deforms InitSurf meshes using the input volumes and geometric losses, and writes **deformed** surfaces to a BIDS-derivatives folder.
+This stage deforms InitSurf meshes using input volumes and geometric losses, and writes **deformed** surfaces to a BIDS-derivatives folder.
 
 ### Inputs
 - Preproc root (`scpp-preproc-*`): MNI T1 + GT FreeSurfer surfaces in MNI space
@@ -303,7 +250,6 @@ This stage deforms InitSurf meshes using the input volumes and geometric losses,
 
 ### Outputs
 Deformed surfaces under `scpp-deform-*`:
-
 ```text
 scpp-deform-0.1/
   dataset_description.json
@@ -330,6 +276,12 @@ scpp deform infer
 ```bash
 scpp deform eval
 ```
+
+Evaluation writes four Excel files:
+- `surface_metrics.xlsx`
+- `collision_metrics.xlsx`
+- `collision_metrics_enhanced.xlsx`
+- `collision_summary.xlsx`
 
 ---
 
