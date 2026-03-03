@@ -1,6 +1,6 @@
 # SimCortexPP (SCPP)
 
-SimCortexPP (SCPP) is a **CLI-first** Python package for cortical surface reconstruction in MNI space. It provides four stages:
+SimCortexPP (SCPP) is a modular pipeline for cortical surface reconstruction in MNI space. It provides four stages:
 
 1. **Preprocessing (FreeSurfer → MNI152)**  
    Export key FreeSurfer volumes/surfaces, register them to MNI152, and write outputs in a **BIDS-derivatives-style** layout.
@@ -303,7 +303,3 @@ For each dataset root:
 
 ---
 
-
-## License
-
-Add your license and citation details here if needed.
