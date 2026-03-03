@@ -24,11 +24,10 @@ This README focuses on **how to run the pipeline correctly** (inputs, outputs, f
 - [Configuration](#configuration)
 - [Data and Folder Conventions](#data-and-folder-conventions)
 - [Split File Format](#split-file-format)
-- [Stage 1 — Preprocessing: FreeSurfer → MNI152](#stage-1--preprocessing-freesurfer--mni152)
-- [Stage 2 — Segmentation: 3D U-Net (MNI space)](#stage-2--segmentation-3d-u-net-mni-space)
-- [Stage 3 — Initial Surfaces (InitSurf)](#stage-3--initial-surfaces-initsurf)
-- [Stage 4 — Deformation (Deform)](#stage-4--deformation-deform)
-- [License](#license)
+- [Stage 1 - Preprocessing (FreeSurfer to MNI152)](#stage-1--preprocessing-freesurfer--mni152)
+- [Stage 2 - Segmentation (3D U-Net, MNI space)](#stage-2--segmentation-3d-u-net-mni-space)
+- [Stage 3 - Initial Surfaces (InitSurf)](#stage-3--initial-surfaces-initsurf)
+- [Stage 4 - Deformation (Deform)](#stage-4--deformation-deform)
 
 ---
 
@@ -122,7 +121,7 @@ sub-0001,test,OASIS1
 
 ---
 
-## Stage 1 — Preprocessing: FreeSurfer → MNI152
+## Stage 1 - Preprocessing (FreeSurfer to MNI152)
 
 This stage exports key FreeSurfer outputs (volumes + surfaces), registers them to **MNI152**, and writes results to a **BIDS-derivatives-style** folder.
 
@@ -164,7 +163,7 @@ scpp-preproc-0.1/
 
 ---
 
-## Stage 2 — Segmentation: 3D U-Net (MNI space)
+## Stage 2 - Segmentation (3D U-Net, MNI space)
 
 This stage trains and applies a 3D U-Net to predict a **9-class segmentation** in **MNI152 space** using Stage 1 outputs.
 
@@ -239,7 +238,7 @@ Typical runtime: ~31 s/subject (hardware-dependent).
 
 ---
 
-## Stage 4 — Deformation (Deform)
+## Stage 4 - Deformation (Deform)
 
 This stage deforms InitSurf meshes using input volumes and geometric losses, and writes **deformed** surfaces to a BIDS-derivatives folder.
 
