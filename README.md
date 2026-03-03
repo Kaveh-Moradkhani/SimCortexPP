@@ -1,6 +1,6 @@
 # SimCortexPP (SCPP)
 
-SimCortexPP (SCPP) is a modular pipeline for cortical surface reconstruction in MNI space. It provides four stages:
+SimCortexPP (SCPP) is a modular framework for cortical surface reconstruction in MNI152 space. It provides four stages:
 
 1. **Preprocessing (FreeSurfer to MNI152)**  
    Export key FreeSurfer volumes/surfaces, register them to MNI152, and write outputs in a **BIDS-derivatives-style** layout.

@@ -4,14 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "simcortexpp"
-version = "0.1.3"
-description = "SimCortexPP (SCPP) is a modular pipeline for cortical surface reconstruction (preproc, seg, initsurf, deform)"
+version = "0.1.5"
+description = "SimCortexPP is a modular framework for cortical surface reconstruction."
 readme = "README.md"
 requires-python = ">=3.10"
+
+license = { file = "LICENSE" }
 
 authors = [
   { name = "Kaveh Moradkhani" },
   { name = "Sylvain Bouix" }
+]
+
+[project.urls]
+"Source Code" = "https://github.com/Neuro-iX/simcortexpp"
+"Lab Page" = "https://github.com/Neuro-iX"
+
+
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
 ]
 
 dependencies = [
@@ -47,6 +60,7 @@ scpp = "simcortexpp.cli.main:app"
 [tool.setuptools]
 package-dir = {"" = "src"}
 include-package-data = true
+license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -55,3 +69,4 @@ where = ["src"]
 simcortexpp = [
   "configs/**/*.yaml",
 ]
+
